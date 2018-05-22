@@ -3,6 +3,7 @@
 import socket
 import struct
 import sys
+import re
 
 # We want unbuffered stdout so we can provide live feedback for
 # each TTL. You could also use the "-u" flag to Python.
@@ -18,6 +19,11 @@ sys.stdout.flush
 def main(args):
     dest_name = args[1] #trzeba zrobic obsluge bledu
     dest_addr = socket.gethostbyname(dest_name)
+    match = re.match(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}[^0-9]",dest_addr)
+    if match:
+	print("ok")
+    else:
+	print("dupa")
     port = 33434
     max_hops = 30
     icmp = socket.getprotobyname('icmp')
