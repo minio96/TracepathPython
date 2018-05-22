@@ -15,7 +15,8 @@ class Flushfile:
 
 sys.stdout.flush
 
-def main(dest_name):
+def main(args):
+    dest_name = args[1] #trzeba zrobic obsluge bledu
     dest_addr = socket.gethostbyname(dest_name)
     port = 33434
     max_hops = 30
@@ -71,4 +72,4 @@ def main(dest_name):
             break
 
 if __name__ == "__main__":
-    main('wp.pl')
+	sys.exit(main(sys.argv))
