@@ -5,27 +5,20 @@ import struct
 import sys
 import re
 
-# We want unbuffered stdout so we can provide live feedback for
-# each TTL. You could also use the "-u" flag to Python.
-class Flushfile:
-    def __init__(self, f):
-        self.f = f
-    def write(self, x):
-        self.f.write(x)
-        self.f.flush()
-
-sys.stdout.flush
-
 def main(args):
-    dest_name = args[1] #trzeba zrobic obsluge bledu
-    dest_addr = socket.gethostbyname(dest_name)
-    match = re.match(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}[^0-9]",dest_addr)
+    dest_name = args[1]
+    match = re.match(r"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b", args[1])
     if match:
-	print("ok")
+        print("IP address inserted")
+        dest_addr = dest_name
     else:
-	print("dupa")
+        print("Domain name inserted")
+        dest_addr = socket.gethostbyname(dest_name)
+        dest_name = dest_addr
+
+    print(dest_addr)
     port = 33434
-    max_hops = 30
+    max_hops = 10
     icmp = socket.getprotobyname('icmp')
     udp = socket.getprotobyname('udp')
     ttl = 1
@@ -35,7 +28,7 @@ def main(args):
         send_socket.setsockopt(socket.SOL_IP, socket.IP_TTL, ttl)
         
         # Build the GNU timeval struct (seconds, microseconds)
-        timeout = struct.pack("ll", 5, 0)
+        timeout = struct.pack("ll", 2, 0)
         
         # Set the receive timeout so we behave more like regular traceroute
         recv_socket.setsockopt(socket.SOL_SOCKET, socket.SO_RCVTIMEO, timeout)
@@ -50,8 +43,10 @@ def main(args):
         tries = 3
         while not finished and tries > 0:
             try:
-                string, curr_addr = recv_socket.recvfrom(512)
+                bytes, curr_addr = recv_socket.recvfrom(512)
+                print(bytes)
                 finished = True
+                print(curr_addr)
                 curr_addr = curr_addr[0]
                 try:
                     curr_name = socket.gethostbyaddr(curr_addr)[0]
